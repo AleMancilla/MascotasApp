@@ -28,7 +28,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: Container(
         alignment: Alignment.center,
@@ -36,8 +35,8 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Image.asset(
           'assets/pet_icon.jpg',
           fit: BoxFit.cover,
-          width: size.width / 2,
-          height: size.height / 2,
+          width: 100,
+          height: 100,
         ),
       ),
     );
