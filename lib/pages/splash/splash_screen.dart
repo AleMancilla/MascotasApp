@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mascotas_app/pages/home_page.dart';
+import 'package:mascotas_app/pages/login/sign_in.dart';
+import 'package:mascotas_app/utils/navigator_route.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -13,17 +16,34 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
+    verifyStatusUserLogin();
+    super.initState();
+  }
+
+  void redirectorToPage(Widget page) {
     Future.delayed(Duration.zero, () {
       Timer(const Duration(seconds: 4), () {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const HomePage(),
-            ));
+        try {
+          navigatorPushReplacement(context, page);
+        } catch (e) {
+          throw 'NO CONTEXT IN PAGE';
+        }
       });
     });
+  }
 
-    super.initState();
+  void verifyStatusUserLogin() {
+    try {
+      FirebaseAuth.instance.authStateChanges().listen((User? user) {
+        if (user == null) {
+          redirectorToPage(const SignInPage());
+        } else {
+          redirectorToPage(const HomePage());
+        }
+      });
+    } catch (e) {
+      throw 'error de estado';
+    }
   }
 
   @override
