@@ -23,6 +23,7 @@ class _BottomNavigatorIconState extends State<BottomNavigatorIcon> {
         widget.onTap!();
       },
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             widget.icono,
@@ -32,6 +33,7 @@ class _BottomNavigatorIconState extends State<BottomNavigatorIcon> {
             widget.textIcon.toString(),
             style: TextStyle(
               color: widget.isSelect ? Colors.green : Colors.grey,
+              fontSize: 12,
             ),
           ),
         ],

@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mascotas_app/pages/boddy_app/home_page_boddy.dart';
+import 'package:mascotas_app/pages/boddy_app/organizer_boddy.dart';
+import 'package:mascotas_app/pages/boddy_app/veterinary_boddy.dart';
 import 'package:mascotas_app/utils/utils_theme.dart';
 import 'package:mascotas_app/widgets/group/bottom_navigator_bar.dart';
 import 'package:mascotas_app/widgets/unit/bottom_navigator_icon.dart';
@@ -56,19 +59,11 @@ class _HomePageState extends State<HomePage>
                 height: size.height - 50,
                 child: IndexedStack(
                   index: _indexPage,
-                  children: [
-                    Container(
-                      color: Colors.blueGrey,
-                    ),
-                    Container(
-                      color: Colors.green,
-                    ),
-                    Container(
-                      color: Colors.blue,
-                    ),
-                    Container(
-                      color: Colors.orange,
-                    ),
+                  children: const [
+                    HomePageBoddy(),
+                    OrganizerBoddy(),
+                    VeterinaryBoddy(),
+                    OrganizerBoddy(),
                   ],
                 ),
               ),
@@ -122,11 +117,11 @@ class _HomePageState extends State<HomePage>
   List<Widget> listOptionsFloatingActionButtom() {
     return [
       itemFloatingActionButtom('Puiblicar mascota perdida', () {}),
-      Divider(color: Colors.grey[200]),
+      Divider(color: Colors.grey.withOpacity(0.4)),
       itemFloatingActionButtom('Puiblicar mascota encontrada', () {}),
-      Divider(color: Colors.grey[200]),
+      Divider(color: Colors.grey.withOpacity(0.4)),
       itemFloatingActionButtom('Puiblicar mascota en adopcion', () {}),
-      Divider(color: Colors.grey[200]),
+      Divider(color: Colors.grey.withOpacity(0.4)),
       itemFloatingActionButtom(
           'Puiblicar mascota necesita hogar temporal', () {}),
     ];
@@ -160,8 +155,8 @@ class _HomePageState extends State<HomePage>
         children: [
           const SizedBox(height: 20),
           BottomNavigatorIcon(
-              textIcon: 'uno',
-              icono: Icons.favorite,
+              textIcon: 'Inicio',
+              icono: Icons.home,
               isSelect: _indexPage == 0 ? true : false,
               onTap: () {
                 _indexPage = 0;
@@ -173,8 +168,8 @@ class _HomePageState extends State<HomePage>
         children: [
           const SizedBox(height: 20),
           BottomNavigatorIcon(
-              textIcon: 'dos',
-              icono: Icons.favorite,
+              textIcon: 'Organizacion',
+              icono: Icons.corporate_fare,
               isSelect: _indexPage == 1 ? true : false,
               onTap: () {
                 _indexPage = 1;
@@ -208,8 +203,8 @@ class _HomePageState extends State<HomePage>
         children: [
           const SizedBox(height: 20),
           BottomNavigatorIcon(
-              textIcon: 'tres',
-              icono: Icons.favorite,
+              textIcon: 'Veterinarios',
+              icono: Icons.pets,
               isSelect: _indexPage == 2 ? true : false,
               onTap: () {
                 _indexPage = 2;
@@ -221,8 +216,8 @@ class _HomePageState extends State<HomePage>
         children: [
           const SizedBox(height: 20),
           BottomNavigatorIcon(
-              textIcon: 'cuatro',
-              icono: Icons.favorite,
+              textIcon: 'Servicios',
+              icono: Icons.sell_rounded,
               isSelect: _indexPage == 3 ? true : false,
               onTap: () {
                 _indexPage = 3;
