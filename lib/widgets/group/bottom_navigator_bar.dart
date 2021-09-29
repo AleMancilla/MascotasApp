@@ -10,6 +10,7 @@ class BottomNavigatorBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children:
           listIconBytton.map((dataIcon) => Expanded(child: dataIcon)).toList(),
     );

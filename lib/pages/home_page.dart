@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mascotas_app/widgets/group/bottom_navigator_bar.dart';
-import 'package:mascotas_app/widgets/object/data_icon_buttom.dart';
 import 'package:mascotas_app/widgets/unit/bottom_navigator_icon.dart';
 
 class HomePage extends StatefulWidget {
@@ -11,8 +10,28 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   static int _indexPage = 0;
+
+  AnimationController? _animationController;
+  bool isPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 450));
+  }
+
+  void _handleOnPressed() {
+    setState(() {
+      isPlaying = !isPlaying;
+      isPlaying
+          ? _animationController!.forward()
+          : _animationController!.reverse();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +93,21 @@ class _HomePageState extends State<HomePage> {
             _indexPage = 1;
             setState(() {});
           }),
+      InkWell(
+        child: Container(
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.blueGrey[900],
+            shape: BoxShape.circle,
+          ),
+          child: AnimatedIcon(
+            icon: AnimatedIcons.play_pause,
+            color: Colors.white,
+            progress: _animationController!,
+          ),
+        ),
+        onTap: () => _handleOnPressed(),
+      ),
       BottomNavigatorIcon(
           textIcon: 'tres',
           icono: Icons.favorite,

@@ -16,6 +16,7 @@ class SignInPage extends StatelessWidget {
             signInWithGoogle()
                 .then((value) =>
                     navigatorPushReplacement(context, const HomePage()))
+                // ignore: avoid_print
                 .onError((error, stackTrace) => print('ERROR DE SIGNOT'));
           },
           child: const Text('SignIn with google'),
