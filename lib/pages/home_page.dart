@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mascotas_app/utils/utils_theme.dart';
 import 'package:mascotas_app/widgets/group/bottom_navigator_bar.dart';
 import 'package:mascotas_app/widgets/unit/bottom_navigator_icon.dart';
 
@@ -17,6 +18,8 @@ class _HomePageState extends State<HomePage>
   AnimationController? _animationController;
   bool isPlaying = false;
 
+  double positionedMenuBottom = -200;
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +33,12 @@ class _HomePageState extends State<HomePage>
       isPlaying
           ? _animationController!.forward()
           : _animationController!.reverse();
+
+      if (isPlaying) {
+        positionedMenuBottom = 50;
+      } else {
+        positionedMenuBottom = -200;
+      }
     });
   }
 
@@ -38,92 +47,189 @@ class _HomePageState extends State<HomePage>
     Size size = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Material App Bar'),
+        body: Stack(
+          children: [
+            Positioned(
+              bottom: 50,
+              child: SizedBox(
+                width: size.width,
+                height: size.height - 50,
+                child: IndexedStack(
+                  index: _indexPage,
+                  children: [
+                    Container(
+                      color: Colors.blueGrey,
+                    ),
+                    Container(
+                      color: Colors.green,
+                    ),
+                    Container(
+                      color: Colors.blue,
+                    ),
+                    Container(
+                      color: Colors.orange,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            AnimatedPositioned(
+              bottom: positionedMenuBottom,
+              duration: const Duration(milliseconds: 300),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey[900],
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                  ),
+                ),
+                width: size.width,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: listOptionsFloatingActionButtom(),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              child: Container(
+                // width: 150,
+                width: size.width,
+                height: 55,
+                color: Colors.blue[100],
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              child: SizedBox(
+                // width: 150,
+                width: size.width,
+                height: 70,
+                child: BottomNavigatorBar(
+                  listIconBytton: groupButtomNavigator(context),
+                ),
+              ),
+            ),
+          ],
         ),
-        body: SizedBox(
-          width: size.width,
-          height: size.height,
-          child: IndexedStack(
-            index: _indexPage,
-            children: [
-              Container(
-                color: Colors.blueGrey,
-              ),
-              Container(
-                color: Colors.green,
-              ),
-              Container(
-                color: Colors.blue,
-              ),
-              Container(
-                color: Colors.orange,
-              ),
-            ],
+      ),
+    );
+  }
+
+  List<Widget> listOptionsFloatingActionButtom() {
+    return [
+      itemFloatingActionButtom('Puiblicar mascota perdida', () {}),
+      Divider(color: Colors.grey[200]),
+      itemFloatingActionButtom('Puiblicar mascota encontrada', () {}),
+      Divider(color: Colors.grey[200]),
+      itemFloatingActionButtom('Puiblicar mascota en adopcion', () {}),
+      Divider(color: Colors.grey[200]),
+      itemFloatingActionButtom(
+          'Puiblicar mascota necesita hogar temporal', () {}),
+    ];
+  }
+
+  Widget itemFloatingActionButtom(String texto, Function ontap) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            ontap();
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+            width: double.infinity,
+            child: Text(
+              texto,
+              style: styleItemMenuFloatinActionButtom,
+            ),
           ),
         ),
-        bottomNavigationBar: Container(
-          // width: 150,
-          height: 50,
-          color: Colors.red,
-          child: BottomNavigatorBar(
-            listIconBytton: groupButtomNavigator(context),
-          ),
-        ),
-        // bottomSheet: BottomNavigatorBar(),
       ),
     );
   }
 
   List<Widget> groupButtomNavigator(BuildContext context) {
     return [
-      BottomNavigatorIcon(
-          textIcon: 'uno',
-          icono: Icons.favorite,
-          isSelect: _indexPage == 0 ? true : false,
-          onTap: () {
-            _indexPage = 0;
-            setState(() {});
-          }),
-      BottomNavigatorIcon(
-          textIcon: 'dos',
-          icono: Icons.favorite,
-          isSelect: _indexPage == 1 ? true : false,
-          onTap: () {
-            _indexPage = 1;
-            setState(() {});
-          }),
-      InkWell(
-        child: Container(
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: Colors.blueGrey[900],
-            shape: BoxShape.circle,
-          ),
-          child: AnimatedIcon(
-            icon: AnimatedIcons.play_pause,
-            color: Colors.white,
-            progress: _animationController!,
-          ),
-        ),
-        onTap: () => _handleOnPressed(),
+      Column(
+        children: [
+          const SizedBox(height: 20),
+          BottomNavigatorIcon(
+              textIcon: 'uno',
+              icono: Icons.favorite,
+              isSelect: _indexPage == 0 ? true : false,
+              onTap: () {
+                _indexPage = 0;
+                setState(() {});
+              }),
+        ],
       ),
-      BottomNavigatorIcon(
-          textIcon: 'tres',
-          icono: Icons.favorite,
-          isSelect: _indexPage == 2 ? true : false,
-          onTap: () {
-            _indexPage = 2;
-            setState(() {});
-          }),
-      BottomNavigatorIcon(
-          textIcon: 'cuatro',
-          icono: Icons.favorite,
-          isSelect: _indexPage == 3 ? true : false,
-          onTap: () {
-            _indexPage = 3;
-            setState(() {});
-          }),
+      Column(
+        children: [
+          const SizedBox(height: 20),
+          BottomNavigatorIcon(
+              textIcon: 'dos',
+              icono: Icons.favorite,
+              isSelect: _indexPage == 1 ? true : false,
+              onTap: () {
+                _indexPage = 1;
+                setState(() {});
+              }),
+        ],
+      ),
+      Column(
+        children: [
+          Expanded(
+            child: InkWell(
+              child: Container(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey[800],
+                  shape: BoxShape.circle,
+                ),
+                child: AnimatedIcon(
+                  icon: AnimatedIcons.menu_close,
+                  color: Colors.white,
+                  progress: _animationController!,
+                ),
+              ),
+              onTap: () => _handleOnPressed(),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+      Column(
+        children: [
+          const SizedBox(height: 20),
+          BottomNavigatorIcon(
+              textIcon: 'tres',
+              icono: Icons.favorite,
+              isSelect: _indexPage == 2 ? true : false,
+              onTap: () {
+                _indexPage = 2;
+                setState(() {});
+              }),
+        ],
+      ),
+      Column(
+        children: [
+          const SizedBox(height: 20),
+          BottomNavigatorIcon(
+              textIcon: 'cuatro',
+              icono: Icons.favorite,
+              isSelect: _indexPage == 3 ? true : false,
+              onTap: () {
+                _indexPage = 3;
+                setState(() {});
+              }),
+        ],
+      ),
     ];
   }
 }
