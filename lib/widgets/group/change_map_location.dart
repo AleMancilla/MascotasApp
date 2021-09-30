@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mascotas_app/utils/styleMapa.dart';
-import 'package:mascotas_app/widgets/unit/unit_label_input.dart';
 
 // ignore: must_be_immutable
 class ChangeMapPosition extends StatefulWidget {
@@ -129,10 +128,10 @@ class _ChangeMapPositionState extends State<ChangeMapPosition> {
                     style: TextStyle(color: Colors.red),
                   ),
                   onPressed: () {
-                    widget.controllerTextLat.text = '';
-                    widget.controllerTextLong.text = '';
-                    widget.controllerTextDirection.text = '';
-                    widget.controllerTextCiudad.text = '';
+                    // widget.controllerTextLat.text = '';
+                    // widget.controllerTextLong.text = '';
+                    // widget.controllerTextDirection.text = '';
+                    // widget.controllerTextCiudad.text = '';
                     Navigator.pop(context);
                   },
                 ),

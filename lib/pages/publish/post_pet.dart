@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -10,14 +11,18 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mascotas_app/business/Firebase/Firebase_firestore_api.dart';
 import 'package:mascotas_app/business/geolocator.dart';
-import 'package:mascotas_app/pages/publish/firebase_api.dart';
+import 'package:mascotas_app/business/Firebase/firebase_storage_api.dart';
+import 'package:mascotas_app/business/objects/pet_publish.dart';
 import 'package:mascotas_app/utils/utils_theme.dart';
 import 'package:mascotas_app/widgets/group/change_map_location.dart';
 import 'package:mascotas_app/widgets/unit/button_widget.dart';
 import 'package:mascotas_app/widgets/unit/unit_label_input.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 enum typePost { lost, found, adoption }
 
@@ -62,6 +67,7 @@ class PostPet extends StatefulWidget {
 }
 
 class _PostPetState extends State<PostPet> {
+  FirebaseFirestoreApi apiFirestore = FirebaseFirestoreApi();
   // TextEditingController controllerNamePet = TextEditingController();
   TextEditingController controllerDescriptionPet = TextEditingController();
   TextEditingController controllerNameOwner = TextEditingController();
@@ -405,7 +411,7 @@ class _PostPetState extends State<PostPet> {
                 ButtonWidget(
                   icon: Icons.upload,
                   text: 'Enviar Datos',
-                  onClicked: () {
+                  onClicked: () async {
                     String sizePetText = '';
                     String raza = '';
                     String sexo = '';
@@ -436,6 +442,74 @@ class _PostPetState extends State<PostPet> {
                     _initialPosition => ${_initialPosition.target}
                     type => ${widget.type}
                     ''');
+
+                    if (controllerDescriptionPet.text.length < 10 ||
+                        controllerNamePet.text.length < 3 ||
+                        controllerNameOwner.text.length < 3 ||
+                        controllerNumberOwner.text.length < 5 ||
+                        fechaEstado == "--/--/----" ||
+                        horaEstado == "00:00" ||
+                        (imageUrl == null || imageUrl == '') ||
+                        raza == "" ||
+                        sexo == "" ||
+                        controllerNumberOwner.text.length < 5 ||
+                        textControllerCiudad.text.length < 5) {
+                      print('''
+                      ${controllerDescriptionPet.text.length < 10} => controllerDescriptionPet.text.length < 10 
+                      ${controllerNamePet.text.length < 3} => controllerNamePet.text.length < 3 
+                      ${controllerNameOwner.text.length < 3} => controllerNameOwner.text.length < 3 
+                      ${controllerNumberOwner.text.length < 5} => controllerNumberOwner.text.length < 5 
+                      ${fechaEstado == "--/--/----"} => fechaEstado == "--/--/----" 
+                      ${horaEstado == "00:00"} => horaEstado == "00:00" 
+                      ${(imageUrl == null || imageUrl == '')} => (imageUrl == null || imageUrl == '') 
+                      ${raza == ""} => raza == "" 
+                      ${sexo == ""} => sexo == "" 
+                      ${controllerNumberOwner.text.length < 5} => controllerNumberOwner.text.length < 5 
+                      ${textControllerCiudad.text.length < 5} => textControllerCiudad.text.length < 5)
+''');
+                      showTopSnackBar(
+                        context,
+                        const CustomSnackBar.info(
+                          message:
+                              'Porfavor llena todos los campos de la publicacion',
+                        ),
+                      );
+                    } else {
+                      PetPublish newPost = PetPublish(
+                          descriptionPet: controllerDescriptionPet.text,
+                          nameOwner: controllerNameOwner.text,
+                          namePet: controllerNamePet.text,
+                          numberOwner: controllerNumberOwner.text,
+                          dateState: fechaEstado,
+                          hourState: horaEstado,
+                          imageUrl: imageUrl!,
+                          sizePetText: sizePetText,
+                          raza: raza,
+                          sex: sexo,
+                          position: GeoPoint(_initialPosition.target.latitude,
+                              _initialPosition.target.longitude),
+                          type: widget.type,
+                          direction: textControllerDireccion.text,
+                          city: textControllerCiudad.text);
+                      bool response = await apiFirestore.addPetPublish(newPost);
+                      print('======== $response');
+                      if (response) {
+                        showTopSnackBar(
+                          context,
+                          const CustomSnackBar.success(
+                            message: 'Los datos se cargaron exitosamente',
+                          ),
+                        );
+                      } else {
+                        showTopSnackBar(
+                          context,
+                          const CustomSnackBar.error(
+                            message:
+                                'Hubo un problema, por favor intentelo nuevamente',
+                          ),
+                        );
+                      }
+                    }
                   },
                 ),
                 const SizedBox(height: 10),
@@ -524,7 +598,7 @@ class _PostPetState extends State<PostPet> {
     final fileName = basename(file!.path);
     final destination = 'files/$fileName';
 
-    task = FirebaseApi.uploadFile(destination, file!);
+    task = FirebaseStorageApi.uploadFile(destination, file!);
 
     if (task == null) return;
 
