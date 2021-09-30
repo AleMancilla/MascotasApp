@@ -1,10 +1,26 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:mascotas_app/pages/publish/firebase_api.dart';
 import 'package:mascotas_app/utils/utils_theme.dart';
 import 'package:mascotas_app/widgets/unit/unit_label_input.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart';
+
+/// Enum representing the upload task types the example app supports.
+enum UploadType {
+  /// Uploads a randomly generated string (as a file) to Storage.
+  string,
+
+  /// Uploads a file from the device.
+  file,
+
+  /// Clears any tasks from the list.
+  clear,
+}
 
 class PostLostPet extends StatefulWidget {
   const PostLostPet({Key? key}) : super(key: key);
@@ -31,8 +47,11 @@ class _PostLostPetState extends State<PostLostPet> {
   String fechaEstado = "--/--/----";
   String horaEstado = "00:00";
 
+  String? imageUrl;
+
   @override
   Widget build(BuildContext context) {
+    final fileName = file != null ? basename(file!.path) : 'No File Selected';
     return SafeArea(
       child: Scaffold(
         body: Column(
@@ -148,7 +167,8 @@ class _PostLostPetState extends State<PostLostPet> {
               children: [
                 FlatButton(
                     onPressed: () {
-                      getImage(ImageSource.gallery);
+                      // getImage(ImageSource.gallery);
+                      selectFile();
                     },
                     child: Column(
                       children: [
@@ -156,28 +176,24 @@ class _PostLostPetState extends State<PostLostPet> {
                           "Suba una foto de la mascota",
                           style: styleTextSubIndice,
                         ),
-                        Image.asset(
-                          "assets/images/upload.png",
+                        Container(
                           width: 150,
                           height: 150,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: Colors.blueGrey,
+                              boxShadow: const [
+                                BoxShadow(
+                                    offset: Offset(-3, 3),
+                                    color: Colors.black26,
+                                    blurRadius: 3)
+                              ]),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: imageUpload(),
+                          ),
                         )
-                        // imageUrl == null
-                        //     ? Image.asset(
-                        //         "assets/images/upload.png",
-                        //         width: 150,
-                        //         height: 150,
-                        //       )
-                        //     : ClipRRect(
-                        //         borderRadius: BorderRadius.circular(20),
-                        //         child: FadeInImage(
-                        //           placeholder:
-                        //               AssetImage("assets/images/upload.png"),
-                        //           image: NetworkImage(imageUrl),
-                        //           fit: BoxFit.cover,
-                        //           width: 200,
-                        //           height: 200,
-                        //         ),
-                        //       ),
                       ],
                     )),
                 Column(
@@ -229,65 +245,141 @@ class _PostLostPetState extends State<PostLostPet> {
             UnitLabelInput(
               title: 'Nombre de la mascota',
               control: controllerNameOwner,
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
-  //////////////////////////////////////////////////////////////
-  ///
-
-  bool? isLoading;
-  File? imageFile;
-  String? imageUrl;
-  final ImagePicker _picker = ImagePicker();
-
-  Future getImage(ImageSource source) async {
-    final XFile? image = await _picker.pickImage(source: source);
-    if (image != null) {
-      imageFile = File(image.path);
-      if (imageFile != null) {
-        setState(() {
-          isLoading = true;
-        });
-        // uploadFile();
+  //
+  bool flagUpload = false;
+  Widget imageUpload() {
+    if (imageUrl == null && !flagUpload) {
+      return Image.asset(
+        "assets/images/upload.png",
+        width: 125,
+        height: 125,
+      );
+    } else if (imageUrl == null && flagUpload) {
+      return const SizedBox(
+        width: 150,
+        height: 150,
+        child: CircularProgressIndicator(),
+      );
+    } else {
+      if (imageUrl != null) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: FadeInImage(
+            placeholder: const AssetImage("assets/images/upload.png"),
+            image: NetworkImage(imageUrl!),
+            fit: BoxFit.cover,
+            width: 200,
+            height: 200,
+          ),
+        );
+      } else {
+        return const Text('data no found');
       }
     }
-    // imageFile = File(pickedFile.path);
   }
 
-  // Future uploadFile() async {
-  //   Fluttertoast.showToast(
-  //       msg: 'Porfavor espere mientras cargan los datos de la imagen',
-  //       backgroundColor: Colors.green);
+////////
+  ///
+  ///
+  ///
+  @override
+  void dispose() {
+    flagUpload = false;
+    imageUrl = null;
+    super.dispose();
+  }
 
-  //   String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-  //   StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
-  //   StorageUploadTask uploadTask = reference.putFile(imageFile);
-  //   StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
-  //   await storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
-  //     imageUrl = downloadUrl;
-  //     setState(() {
-  //       isLoading = false;
-  //       // onSendMessage(imageUrl, 1);
-  //     });
-  //   }, onError: (err) {
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //     Fluttertoast.showToast(msg: 'This file is not an image');
-  //   });
-  // }
+  UploadTask? task;
+  File? file;
+  Future selectFile() async {
+    final result = await FilePicker.platform.pickFiles(allowMultiple: false);
 
-  // //////////////////////////////////////////
-  // CameraPosition positionMap = new CameraPosition(
-  //     target: LatLng(-16.482557865279468, -68.1214064732194), zoom: 16);
+    if (result == null) return;
+    flagUpload = true;
+    setState(() {});
+    final path = result.files.single.path!;
 
-  // Completer<GoogleMapController> _controller = Completer();
-  // Future<void> _moveTo(CameraPosition position) async {
-  //   final GoogleMapController controller = await _controller.future;
-  //   controller.animateCamera(CameraUpdate.newCameraPosition(position));
-  // }
+    setState(() => file = File(path));
+    await uploadFile();
+  }
+
+  Future uploadFile() async {
+    if (file == null) return;
+
+    final fileName = basename(file!.path);
+    final destination = 'files/$fileName';
+
+    task = FirebaseApi.uploadFile(destination, file!);
+
+    if (task == null) return;
+
+    final snapshot = await task!.whenComplete(() {});
+    final urlDownload = await snapshot.ref.getDownloadURL();
+    imageUrl = urlDownload;
+    setState(() {});
+
+    print('Download-Link: $urlDownload');
+  }
+
+  // Widget buildUploadStatus(UploadTask task) => StreamBuilder<TaskSnapshot>(
+  //       stream: task.snapshotEvents,
+  //       builder: (context, snapshot) {
+  //         if (snapshot.hasData) {
+  //           final snap = snapshot.data!;
+  //           final progress = snap.bytesTransferred / snap.totalBytes;
+  //           final percentage = (progress * 100).toStringAsFixed(2);
+
+  //           return Text(
+  //             '$percentage %',
+  //             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  //           );
+  //         } else {
+  //           return Container();
+  //         }
+  //       },
+  //     );
 }
+
+// class ButtonWidget extends StatelessWidget {
+//   final IconData icon;
+//   final String text;
+//   final Function onClicked;
+
+//   const ButtonWidget({
+//     Key? key,
+//     required this.icon,
+//     required this.text,
+//     required this.onClicked,
+//   }) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) => ElevatedButton(
+//         style: ElevatedButton.styleFrom(
+//           primary: Color.fromRGBO(29, 194, 95, 1),
+//           minimumSize: Size.fromHeight(50),
+//         ),
+//         child: buildContent(),
+//         onPressed: () {
+//           onClicked();
+//         },
+//       );
+
+//   Widget buildContent() => Row(
+//         mainAxisSize: MainAxisSize.min,
+//         children: [
+//           Icon(icon, size: 28),
+//           SizedBox(width: 16),
+//           Text(
+//             text,
+//             style: TextStyle(fontSize: 22, color: Colors.white),
+//           ),
+//         ],
+//       );
+// }
