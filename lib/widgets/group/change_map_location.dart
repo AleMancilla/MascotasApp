@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mascotas_app/utils/styleMapa.dart';
+import 'package:mascotas_app/widgets/unit/unit_label_input.dart';
 
 // ignore: must_be_immutable
 class ChangeMapPosition extends StatefulWidget {
@@ -102,12 +103,20 @@ class _ChangeMapPositionState extends State<ChangeMapPosition> {
                     'Direccion:',
                     style: TextStyle(color: Colors.grey, fontSize: 10),
                   ),
+                  // UnitLabelInput(
+                  //   title: 'Direccion',
+                  //   control: widget.controllerTextDirection,
+                  // ),
                   Text(widget.controllerTextDirection.text),
                   const Text(
                     'Ciudad',
                     style: TextStyle(color: Colors.grey, fontSize: 10),
                   ),
                   Text(widget.controllerTextCiudad.text),
+                  // UnitLabelInput(
+                  //   title: 'Ciudad',
+                  //   control: widget.controllerTextCiudad,
+                  // ),
                 ],
               ),
             ),

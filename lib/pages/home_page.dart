@@ -126,12 +126,16 @@ class _HomePageState extends State<HomePage>
   List<Widget> listOptionsFloatingActionButtom() {
     return [
       itemFloatingActionButtom('Puiblicar mascota perdida', () {
-        navigatorPush(context, const PostPet());
+        navigatorPush(context, const PostPet.lost());
       }),
       Divider(color: Colors.grey.withOpacity(0.4)),
-      itemFloatingActionButtom('Puiblicar mascota encontrada', () {}),
+      itemFloatingActionButtom('Puiblicar mascota encontrada', () {
+        navigatorPush(context, const PostPet.found());
+      }),
       Divider(color: Colors.grey.withOpacity(0.4)),
-      itemFloatingActionButtom('Puiblicar mascota en adopcion', () {}),
+      itemFloatingActionButtom('Puiblicar mascota en adopcion', () {
+        navigatorPush(context, const PostPet.adoption());
+      }),
       Divider(color: Colors.grey.withOpacity(0.4)),
       itemFloatingActionButtom(
           'Puiblicar mascota necesita hogar temporal', () {}),

@@ -19,8 +19,43 @@ import 'package:mascotas_app/widgets/unit/unit_label_input.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart';
 
+enum typePost { lost, found, adoption }
+
 class PostPet extends StatefulWidget {
-  const PostPet({Key? key}) : super(key: key);
+  final String textFecha;
+  final String textDireccion;
+  final String textPersona;
+  final String textPersonaNumber;
+  final String textInformation;
+  final typePost type;
+
+  const PostPet.lost({
+    Key? key,
+    this.textInformation = 'INFORMACION DE LA MASCOTA PERDIDA',
+    this.textFecha = 'Fecha cuando se perdio',
+    this.textDireccion = 'Direccion donde se perdio',
+    this.textPersona = 'Nombre del propietario',
+    this.textPersonaNumber = 'Numero del propietario',
+    this.type = typePost.lost,
+  }) : super(key: key);
+  const PostPet.found({
+    Key? key,
+    this.textInformation = 'INFORMACION DE LA MASCOTA ENCONTRADA',
+    this.textFecha = 'Fecha cuando se encontro',
+    this.textDireccion = 'Direccion donde se encontro',
+    this.textPersona = 'Nombre del rescatador',
+    this.textPersonaNumber = 'Numero del recatador',
+    this.type = typePost.found,
+  }) : super(key: key);
+  const PostPet.adoption({
+    Key? key,
+    this.textInformation = 'INFORMACION DE LA MASCOTA EN ADOPCION',
+    this.textFecha = 'Fecha de nacimiento',
+    this.textDireccion = 'Direccion de contacto',
+    this.textPersona = 'Nombre de contacto',
+    this.textPersonaNumber = 'Numero de contacto',
+    this.type = typePost.adoption,
+  }) : super(key: key);
 
   @override
   State<PostPet> createState() => _PostPetState();
@@ -29,7 +64,6 @@ class PostPet extends StatefulWidget {
 class _PostPetState extends State<PostPet> {
   // TextEditingController controllerNamePet = TextEditingController();
   TextEditingController controllerDescriptionPet = TextEditingController();
-  TextEditingController controllerDirectionPet = TextEditingController();
   TextEditingController controllerNameOwner = TextEditingController();
   TextEditingController controllerNamePet = TextEditingController();
   TextEditingController controllerNumberOwner = TextEditingController();
@@ -41,13 +75,12 @@ class _PostPetState extends State<PostPet> {
   bool macho = false;
   bool hembra = false;
 
-  String estadoMascota = "";
   String fechaEstado = "--/--/----";
   String horaEstado = "00:00";
 
   String? imageUrl;
 
-  double sizePet = 1;
+  double sizePet = 2;
 
   @override
   Widget build(BuildContext context) {
@@ -59,8 +92,9 @@ class _PostPetState extends State<PostPet> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text(
-                  "INFORMACION DE LA MASCOTA",
+                Text(
+                  widget.textInformation,
+                  textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
@@ -263,7 +297,7 @@ class _PostPetState extends State<PostPet> {
                     child: Column(
                       children: [
                         Text(
-                          'Que fecha ${estadoMascota == "PERDIDO" ? "se perdio" : estadoMascota == "ENCONTRADO" ? "fue encontrado" : "nacio"}',
+                          widget.textFecha,
                           style:
                               const TextStyle(color: Colors.blue, fontSize: 16),
                         ),
@@ -275,8 +309,8 @@ class _PostPetState extends State<PostPet> {
                       ],
                     )),
                 const SizedBox(height: 10),
-                const Text(
-                  "Direccion de perdida",
+                Text(
+                  widget.textDireccion,
                   style: styleTextSubIndice,
                 ),
                 SizedBox(
@@ -354,7 +388,7 @@ class _PostPetState extends State<PostPet> {
                   style: styleTextSubIndice,
                 ),
                 UnitLabelInput(
-                  title: 'Nombre del propietario',
+                  title: widget.textPersona,
                   control: controllerNameOwner,
                 ),
                 const SizedBox(height: 10),
@@ -363,7 +397,7 @@ class _PostPetState extends State<PostPet> {
                   style: styleTextSubIndice,
                 ),
                 UnitLabelInput(
-                  title: 'Numero del propietario',
+                  title: widget.textPersonaNumber,
                   control: controllerNumberOwner,
                   isNumber: true,
                 ),
@@ -388,7 +422,6 @@ class _PostPetState extends State<PostPet> {
                     // ignore: avoid_print
                     print('''
                     DescriptionPet => ${controllerDescriptionPet.text}
-                    DirectionLost => ${controllerDirectionPet.text}
                     NameOwner => ${controllerNameOwner.text}
                     NamePet => ${controllerNamePet.text}
                     NumberOwner => ${controllerNumberOwner.text}
@@ -398,6 +431,10 @@ class _PostPetState extends State<PostPet> {
                     sizePetText => $sizePetText
                     raza => $raza
                     sexo => $sexo
+                    textControllerDireccion => ${textControllerDireccion.text}
+                    textControllerCiudad => ${textControllerCiudad.text}
+                    _initialPosition => ${_initialPosition.target}
+                    type => ${widget.type}
                     ''');
                   },
                 ),
