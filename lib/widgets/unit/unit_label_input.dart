@@ -25,33 +25,30 @@ class _UnitLabelInputState extends State<UnitLabelInput> {
   Widget build(BuildContext context) {
     return Container(
       //margin: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
-      margin: const EdgeInsets.only(right: 20, bottom: 10, top: 10),
+      margin: const EdgeInsets.only(bottom: 10, top: 10),
       width: double.infinity,
       child: Row(
         children: [
           // Text("$title:"),
           Expanded(
-            child: Container(
-              padding: EdgeInsets.only(left: 20),
-              child: TextField(
-                minLines: (widget.descrip) ? 3 : 1,
-                maxLines: (widget.descrip) ? 10 : 1,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: widget.title,
-                  helperText: widget.helptext,
-                ),
-                keyboardType:
-                    widget.isNumber ? TextInputType.phone : TextInputType.text,
-                controller: widget.control,
-                onChanged: (value) {
-                  setState(() {});
-                },
-                // onChanged: (n) {
-                //   print("completo########");
-                //   if(!ordenData.flagEdit){ordenData.flagEdit = true;}
-                // },
+            child: TextField(
+              minLines: (widget.descrip) ? 3 : 1,
+              maxLines: (widget.descrip) ? 10 : 1,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: widget.title,
+                helperText: widget.helptext,
               ),
+              keyboardType:
+                  widget.isNumber ? TextInputType.phone : TextInputType.text,
+              controller: widget.control,
+              onChanged: (value) {
+                setState(() {});
+              },
+              // onChanged: (n) {
+              //   print("completo########");
+              //   if(!ordenData.flagEdit){ordenData.flagEdit = true;}
+              // },
             ),
           )
         ],

@@ -47,6 +47,13 @@ class _HomePageState extends State<HomePage>
     });
   }
 
+  void _optionsToInit() {
+    _animationController!.reverse();
+    positionedMenuBottom = -200;
+    isPlaying = false;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -119,7 +126,7 @@ class _HomePageState extends State<HomePage>
   List<Widget> listOptionsFloatingActionButtom() {
     return [
       itemFloatingActionButtom('Puiblicar mascota perdida', () {
-        navigatorPush(context, PostLostPet());
+        navigatorPush(context, const PostPet());
       }),
       Divider(color: Colors.grey.withOpacity(0.4)),
       itemFloatingActionButtom('Puiblicar mascota encontrada', () {}),
@@ -139,6 +146,7 @@ class _HomePageState extends State<HomePage>
         child: InkWell(
           onTap: () {
             ontap();
+            _optionsToInit();
           },
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
@@ -164,7 +172,7 @@ class _HomePageState extends State<HomePage>
               isSelect: _indexPage == 0 ? true : false,
               onTap: () {
                 _indexPage = 0;
-                setState(() {});
+                _optionsToInit();
               }),
         ],
       ),
@@ -177,7 +185,7 @@ class _HomePageState extends State<HomePage>
               isSelect: _indexPage == 1 ? true : false,
               onTap: () {
                 _indexPage = 1;
-                setState(() {});
+                _optionsToInit();
               }),
         ],
       ),
@@ -212,7 +220,7 @@ class _HomePageState extends State<HomePage>
               isSelect: _indexPage == 2 ? true : false,
               onTap: () {
                 _indexPage = 2;
-                setState(() {});
+                _optionsToInit();
               }),
         ],
       ),
@@ -225,7 +233,7 @@ class _HomePageState extends State<HomePage>
               isSelect: _indexPage == 3 ? true : false,
               onTap: () {
                 _indexPage = 3;
-                setState(() {});
+                _optionsToInit();
               }),
         ],
       ),
