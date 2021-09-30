@@ -1,11 +1,19 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mascotas_app/business/geolocator.dart';
 import 'package:mascotas_app/pages/publish/firebase_api.dart';
 import 'package:mascotas_app/utils/utils_theme.dart';
+import 'package:mascotas_app/widgets/group/change_map_location.dart';
 import 'package:mascotas_app/widgets/unit/button_widget.dart';
 import 'package:mascotas_app/widgets/unit/unit_label_input.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -268,6 +276,57 @@ class _PostPetState extends State<PostPet> {
                     )),
                 const SizedBox(height: 10),
                 const Text(
+                  "Direccion de perdida",
+                  style: styleTextSubIndice,
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  height: 300,
+                  child: _changeGoogleMap(),
+                ),
+                const Text(
+                  'Direccion:',
+                  style: TextStyle(color: Colors.grey, fontSize: 10),
+                ),
+                Text(textControllerDireccion.text),
+                const Text(
+                  'Ciudad',
+                  style: TextStyle(color: Colors.grey, fontSize: 10),
+                ),
+                Text(textControllerCiudad.text),
+                CupertinoButton(
+                  onPressed: () async {
+                    await showDialog(
+                      context: context,
+                      builder: (context) {
+                        return ChangeMapPosition(
+                          // controller: _controller,
+                          controllerTextLat: textControllerLat,
+                          controllerTextLong: textControllerLong,
+                          controllerTextDirection: textControllerDireccion,
+                          controllerTextCiudad: textControllerCiudad,
+                          positionMap: _initialPosition,
+                          ontap: () async {
+                            _initialPosition = CameraPosition(
+                                target: LatLng(
+                                    double.parse(textControllerLat.text),
+                                    double.parse(textControllerLong.text)),
+                                zoom: 16);
+                            await _moveTo(_initialPosition);
+                            await _obtenerDireccion(
+                                double.parse(textControllerLat.text),
+                                double.parse(textControllerLong.text));
+                            setState(() {});
+                          },
+                        );
+                      },
+                    );
+                  },
+                  color: Colors.green,
+                  child: const Text('Cambiar direccion'),
+                ),
+                const SizedBox(height: 10),
+                const Text(
                   "Nombre de la mascota",
                   style: styleTextSubIndice,
                 ),
@@ -436,5 +495,116 @@ class _PostPetState extends State<PostPet> {
     final urlDownload = await snapshot.ref.getDownloadURL();
     imageUrl = urlDownload;
     setState(() {});
+  }
+
+  /////////////////////
+  /////////////////////
+  late Position position;
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration.zero, () async {
+      getCoordinatesDevice();
+      setState(() {});
+    });
+  }
+
+  void getCoordinatesDevice() async {
+    try {
+      position = await determinePosition();
+    } catch (e) {
+      position = (await Geolocator.getLastKnownPosition())!;
+    }
+    initializePosition();
+  }
+
+  void initializePosition() async {
+    CameraPosition _position = CameraPosition(
+        target: LatLng(position.latitude, position.longitude), zoom: 16);
+    _initialPosition = _position;
+    await _moveTo(_initialPosition);
+    await _obtenerDireccion(
+        _initialPosition.target.latitude, _initialPosition.target.longitude);
+    setState(() {});
+  }
+
+  CameraPosition _initialPosition = const CameraPosition(
+      target: LatLng(-16.49559644284926, -68.1333991911331), zoom: 16);
+
+  // ignore: prefer_final_fields
+  Completer<GoogleMapController> _controller = Completer();
+
+  void _onMapCreated(GoogleMapController controller) {
+    _controller.complete(controller);
+  }
+
+  Future<void> _moveTo(CameraPosition position) async {
+    final controller = await _controller.future;
+    await controller.animateCamera(CameraUpdate.newCameraPosition(position));
+  }
+
+  Future<void> _obtenerDireccion(double lat, double long) async {
+    List<Placemark> placemarks = await placemarkFromCoordinates(lat, long);
+    textControllerLat.text = '$lat';
+    textControllerLong.text = '$long';
+
+    textControllerCiudad.text = placemarks[0].locality!;
+    textControllerDireccion.text = placemarks[0].street!;
+    if (textControllerDireccion.text.contains('Unnamed')) {
+      textControllerDireccion.text = '';
+    }
+  }
+
+  TextEditingController textControllerLat = TextEditingController();
+  TextEditingController textControllerLong = TextEditingController();
+  TextEditingController textControllerDireccion = TextEditingController();
+  TextEditingController textControllerCiudad = TextEditingController();
+
+  Widget _changeGoogleMap() {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: const [
+                BoxShadow(color: Colors.black38, blurRadius: 5)
+              ]),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: GoogleMap(
+              mapType: MapType.normal,
+              initialCameraPosition: _initialPosition,
+              rotateGesturesEnabled: false,
+              myLocationButtonEnabled: false,
+              myLocationEnabled: false,
+              zoomControlsEnabled: false,
+              scrollGesturesEnabled: false,
+              zoomGesturesEnabled: false,
+              onMapCreated: _onMapCreated,
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{}
+                ..add(
+                    Factory<PanGestureRecognizer>(() => PanGestureRecognizer()))
+                ..add(Factory<VerticalDragGestureRecognizer>(
+                    () => VerticalDragGestureRecognizer()))
+                ..add(Factory<HorizontalDragGestureRecognizer>(
+                    () => HorizontalDragGestureRecognizer()))
+                ..add(
+                  Factory<ScaleGestureRecognizer>(
+                      () => ScaleGestureRecognizer()),
+                ),
+            ),
+          ),
+        ),
+        Image.asset(
+          'assets/images/marker.png',
+          width: 40,
+        ),
+        Container(
+          color: Colors.transparent,
+        )
+      ],
+    );
   }
 }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mascotas_app/pages/boddy_app/home_page_boddy.dart';
 import 'package:mascotas_app/pages/boddy_app/organizer_boddy.dart';
 import 'package:mascotas_app/pages/boddy_app/veterinary_boddy.dart';
-import 'package:mascotas_app/pages/publish/post_lost_pet.dart';
+import 'package:mascotas_app/pages/publish/post_pet.dart';
 import 'package:mascotas_app/utils/navigator_route.dart';
 import 'package:mascotas_app/utils/utils_theme.dart';
 import 'package:mascotas_app/widgets/group/bottom_navigator_bar.dart';
